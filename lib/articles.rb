@@ -4,13 +4,16 @@ require "date"
 class Articles
   def all
     db[:articles].all.map do |article|
-      time =  article[:time]
-      article[:time] = {
-        "short" => time.strftime("%Y-%m-%d"),
-        "long" => time.strftime("%H:%M - %d %b %Y")
-      }
+      article[:time] = format(article[:time])
       article
     end
+  end
+
+  def format(time)
+    {
+      "short" => time.strftime("%Y-%m-%d"),
+      "long" => time.strftime("%H:%M - %d %b %Y")
+    }
   end
 
   def save_all(raw_entries)
