@@ -5,7 +5,7 @@ Sequel.migration do
       String :title
       String :content
       String :link
-      Integer :time
+      Time :time
     end
   end
 
