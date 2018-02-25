@@ -3,7 +3,7 @@ require "date"
 
 class Articles
   def all
-    db[:articles].all.map do |article|
+    db[:articles].order_by(Sequel.desc(:time)).all.map do |article|
       article[:time] = format(article[:time])
       article
     end
@@ -17,15 +17,18 @@ class Articles
   end
 
   def save_all(raw_entries)
-    entries = raw_entries.map do |entry|
+    entries = raw_entries.map { |entry| article(entry) }
+
+    db[:articles].insert_conflict.multi_insert(entries)
+  end
+
+  def article(entry)
       {
         title: entry[1]["given_title"],
         content: entry[1]["excerpt"],
         link: entry[1]["given_url"],
         time: timestamp(entry[1]["time_added"])
       }
-    end
-    db[:articles].multi_insert(entries)
   end
 
   def timestamp(value)
