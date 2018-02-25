@@ -18,6 +18,6 @@ namespace "/api" do
   end
 
   get "/articles" do
-    Articles.all().to_json
+    Articles.new.all().to_json
   end
 end

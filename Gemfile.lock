@@ -18,10 +18,12 @@ GEM
     http_parser.rb (0.6.0)
     multi_json (1.13.1)
     mustermann (1.0.2)
+    pg (1.0.0)
     public_suffix (3.0.2)
     rack (2.0.4)
     rack-protection (2.0.1)
       rack
+    rake (12.3.0)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
       rspec-expectations (~> 3.7.0)
@@ -35,6 +37,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.1)
+    sequel (5.5.0)
     sinatra (2.0.1)
       mustermann (~> 1.0)
       rack (~> 2.0)
@@ -57,7 +60,10 @@ PLATFORMS
 
 DEPENDENCIES
   http (~> 3.0)!
+  pg!
+  rake (~> 12.3)!
   rspec (~> 3.7)!
+  sequel (~> 5.5)!
   sinatra (~> 2.0, >= 2.0.1)!
   sinatra-contrib (~> 2.0, >= 2.0.1)!
 
