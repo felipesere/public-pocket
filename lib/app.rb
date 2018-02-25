@@ -17,6 +17,16 @@ namespace "/api" do
   end
 
   get "/articles" do
-    {"hi" => "there"}.to_json
+    [
+      {
+      "title" =>  "Generic numeric functions in safe, stable Rust with the num crate",
+      "content" => "Note: This post assumes some familiarity with Rust, in particular traits.  It is useful to be able to write code that is generic over multiple types, such as integer types.",
+      "time" => {
+        "short" => "2017-4-3",
+        "long" => "20:38 - 3 Apr 2017"
+      },
+      "link" => "https://travisf.net/rust-generic-numbers"
+    }
+    ].to_json
   end
 end
