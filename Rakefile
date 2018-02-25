@@ -1,3 +1,7 @@
+task :default do
+  system "rake --tasks"
+end
+
 # DB migrations
 namespace :db do
   desc "Run migrations"
@@ -12,5 +16,15 @@ namespace :db do
       puts "Migrating to latest"
       Sequel::Migrator.run(db, "db/migrations")
     end
+  end
+end
+
+namespace :pocket do
+  desc "Fetch shared articles from Pocket API"
+  task :fetch do |t, args|
+    require "sequel"
+    require_relative 'lib/pocket.rb'
+
+    Pocket.fetch
   end
 end
