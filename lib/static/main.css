@@ -1,3 +1,12 @@
 div .card {
   margin-bottom: 16px;
 }
+
+.article-structure {
+  display: flex;
+  flex-direction: column;
+}
+
+.article-structure > * {
+  margin-bottom: 0.5rem;
+}
