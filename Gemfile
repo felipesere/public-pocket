@@ -4,6 +4,7 @@ source 'https://rubygems.org' do
   gem 'sinatra-contrib', '~> 2.0', '>= 2.0.1'
   gem 'pg'
   gem 'sequel', '~> 5.5'
+  gem 'sequel_pg', '~> 1.8', '>= 1.8.1'
   gem 'rake', '~> 12.3'
 
   group :test do
