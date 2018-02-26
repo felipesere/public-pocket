@@ -6,9 +6,9 @@ class PocketReader
     @consumer_key = consumer_key
   end
 
-  def read(token)
+  def read(token, tags)
     response = Http.headers(:content_type => "application/json; charset=utf-8")
-                   .post("https://getpocket.com/v3/get", :body => parameters(token).to_json )
+                   .post("https://getpocket.com/v3/get", :body => parameters(token, tags).to_json )
 
     if response.status == 200
       JSON.parse(response.body)
@@ -17,12 +17,12 @@ class PocketReader
     end
   end
 
-  def parameters(token)
+  def parameters(token, tags)
     {
       "consumer_key" => @consumer_key,
       "detailType" => "complete",
       "access_token" => token,
-      "tag" => "share"
+      "tag" => tags
     }
   end
 end

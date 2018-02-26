@@ -37,6 +37,6 @@ namespace :pocket do
     require "sequel"
     require_relative 'lib/pocket.rb'
 
-    Pocket.fetch
+    Pocket.fetch("share")
   end
 end

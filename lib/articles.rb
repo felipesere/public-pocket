@@ -35,12 +35,12 @@ class Articles
         content: entry[1]["excerpt"],
         link: entry[1]["given_url"],
         time: timestamp(entry[1]["time_added"]),
-        tags: tags(entry).pg_array
+        tags: tags(entry).pg_array(:text)
       }
   end
 
   def tags(entry)
-    entry[1]["tags"].keys
+    entry[1]["tags"].keys.reject { |k| ["share"].include?(k) }
   end
 
   def timestamp(value)
