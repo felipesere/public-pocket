@@ -22,7 +22,7 @@ class PocketReader
       "consumer_key" => @consumer_key,
       "detailType" => "complete",
       "access_token" => token,
-      "tag" => "rust"
+      "tag" => "share"
     }
   end
 end
