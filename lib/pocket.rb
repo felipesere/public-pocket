@@ -4,8 +4,14 @@ require_relative 'articles'
 class Pocket
   def self.fetch
     pocket_reader = PocketReader.new(ENV.fetch("CONSUMER_KEY"))
-    raw_articles = pocket_reader.read(ENV.fetch("ACCESS_TOKEN"))
 
-    Articles.new.save_all(raw_articles['list'])
+    access_tokens().each do |token|
+      raw_articles = pocket_reader.read(token)
+      Articles.new.save_all(raw_articles['list'])
+    end
+  end
+
+  def self.access_tokens()
+    ENV.fetch("ACCESS_TOKEN").split(",")
   end
 end
