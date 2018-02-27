@@ -31,9 +31,9 @@ class Articles
 
   def article(entry)
       {
-        title: entry[1]["given_title"],
+        title: entry[1]["resolved_title"],
         content: entry[1]["excerpt"],
-        link: entry[1]["given_url"],
+        link: entry[1]["resolved_url"],
         time: timestamp(entry[1]["time_added"]),
         tags: tags(entry).pg_array(:text)
       }
