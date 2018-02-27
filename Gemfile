@@ -6,6 +6,7 @@ source 'https://rubygems.org' do
   gem 'sequel', '~> 5.5'
   gem 'sequel_pg', '~> 1.8', '>= 1.8.1'
   gem 'rake', '~> 12.3'
+  gem 'builder', '~> 3.2', '>= 3.2.3'
 
   group :test do
     gem 'rspec', '~> 3.7'
