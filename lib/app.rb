@@ -24,7 +24,17 @@ namespace "/api" do
     content_type 'application/json'
   end
 
-  get "/articles" do
-    Articles.new.all().to_json
+  get "/articles/:page/:size" do
+    page = params[:page].to_i
+    size = params[:size].to_i
+    articles = Articles.new.paginated(page, size)
+    response = {articles: articles}
+    if articles.length >= size
+      response[:next] = "/api/articles/#{page+1}/#{size}"
+    end
+    if page > 0
+      response[:previous] = "/api/articles/#{page-1}/#{size}"
+    end
+    response.to_json
   end
 end

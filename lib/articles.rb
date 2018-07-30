@@ -16,6 +16,13 @@ class Articles
     end
   end
 
+  def paginated(page, size)
+    @db[:articles].limit(size, page*size).order_by(Sequel.desc(:time)).map do |article|
+      article[:time] = format(article[:time])
+      article
+    end
+  end
+
   def format(time)
     {
       "short" => time.strftime("%Y-%m-%d"),
