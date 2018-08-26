@@ -1,12 +1,11 @@
 module Main exposing (..)
 
-import Url.Builder as Url
 import Json.Decode exposing (field, maybe)
-import Html exposing (Html, text, div, ol, li, button)
+import Html exposing (Html, text, div, ol, li, button, p, span, footer, a)
 import Html.Events exposing (onClick)
+import Html.Attributes exposing (target, class, datetime, href)
 import Http exposing (send)
 import Browser
-import Debug exposing (..)
 
 
 type Msg
@@ -73,18 +72,6 @@ init _ =
     ( { articles = [], page = Nothing }, load "/api/articles/0/10" )
 
 
-nextPage page =
-    case page of
-        Next a ->
-            load a
-
-        NextPrevious _ a ->
-            load a
-
-        _ ->
-            Debug.todo "Should not have reached here"
-
-
 load : String -> Cmd Msg
 load page =
     Http.send NewArticles (Http.get (toPocketUrl page) decodeArticles)
@@ -140,16 +127,48 @@ update msg model =
                         ( { model | articles = apiResponse.articles, page = page }, Cmd.none )
 
 
+
+-- VIEWS
+
+
 view : Model -> Html Msg
 view { articles, page } =
-    let
-        titles =
-            List.map (\article -> li [] [ text article.title ]) articles
+    div [] (List.append (List.map viewArticle articles) (buttons page))
 
-        list_of_titles =
-            [ ol [] titles ]
-    in
-        div [] (List.append list_of_titles (buttons page))
+
+viewArticle : Article -> Html Msg
+viewArticle article =
+    div [ class "card" ] [ viewHeader article, viewContent article, viewFooter article ]
+
+
+viewHeader { title } =
+    Html.header [ class "card-header" ] [ p [ class "card-header-title" ] [ text title ] ]
+
+
+viewContent { content, time, tags } =
+    div [ class "card-content" ]
+        [ div [ class "content article-structure" ]
+            [ div [] [ text content ]
+            , Html.time [ datetime time.short ] [ text time.long ]
+            , div [ class "tags" ] (List.map viewTag tags)
+            ]
+        ]
+
+
+viewFooter { link } =
+    footer [ class "card-footer-item" ]
+        [ a [ href link, class "card-footer-item", target "_blank" ] [ text "Open" ]
+        , a [ href (pocket link), class "card-footer-item", target "_blank" ] [ text "Save to Pocket" ]
+        ]
+
+
+pocket : String -> String
+pocket link =
+    "https://getpocket.com/edit.php?url=" ++ link
+
+
+viewTag tagname =
+    span [ class "tag is-info is-rounded" ] [ text tagname ]
 
 
 buttons : Maybe Page -> List (Html Msg)
