@@ -2,17 +2,15 @@ module Main exposing (..)
 
 import Url.Builder as Url
 import Json.Decode exposing (field)
-import Html exposing (Html, text, div, ol, li)
+import Html exposing (Html, text, div, ol, li, button)
+import Html.Events exposing (onClick)
 import Http exposing (send)
 import Browser
 
 
-type alias Page =
-    { size : Int, number : Int }
-
-
 type Msg
     = NewArticles (Result Http.Error ApiResponse)
+    | LoadMore
 
 
 type alias Article =
@@ -37,38 +35,40 @@ type alias Articles =
 
 type alias Model =
     { articles : Articles
+    , next : String
     }
 
 
 type alias ApiResponse =
-    { articles : Articles }
+    { articles : Articles
+    , next : String
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { articles = [] }, initialPage )
-
-
-initialPage : Cmd Msg
-initialPage =
     let
-        page =
-            { size = 10, number = 0 }
+        next =
+            "/api/articles/0/10"
     in
-        Http.send NewArticles (Http.get (toPocketUrl page) decodeArticles)
+        ( { articles = [], next = next }, loadPage next )
 
 
-toPocketUrl : Page -> String
-toPocketUrl { size, number } =
-    Url.crossOrigin "https://publicpocket.herokuapp.com"
-        [ "api", "articles", (String.fromInt number), (String.fromInt size) ]
-        []
+loadPage : String -> Cmd Msg
+loadPage page =
+    Http.send NewArticles (Http.get (toPocketUrl page) decodeArticles)
+
+
+toPocketUrl : String -> String
+toPocketUrl page =
+    "https://publicpocket.herokuapp.com" ++ page
 
 
 decodeArticles : Json.Decode.Decoder ApiResponse
 decodeArticles =
-    Json.Decode.map ApiResponse
+    Json.Decode.map2 ApiResponse
         (field "articles" <| Json.Decode.list decodeArticle)
+        (field "next" <| Json.Decode.string)
 
 
 decodeArticle : Json.Decode.Decoder Article
@@ -92,6 +92,9 @@ decodeArticleTime =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        LoadMore ->
+            ( model, loadPage model.next )
+
         NewArticles result ->
             case result of
                 Err _ ->
@@ -102,7 +105,7 @@ update msg model =
                         allArticles =
                             List.append model.articles apiResponse.articles
                     in
-                        ( { model | articles = allArticles }, Cmd.none )
+                        ( { model | articles = allArticles, next = apiResponse.next }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -111,7 +114,15 @@ view { articles } =
         titles =
             List.map (\article -> li [] [ text article.title ]) articles
     in
-        ol [] titles
+        div []
+            [ ol [] titles
+            , moreArticles
+            ]
+
+
+moreArticles : Html Msg
+moreArticles =
+    button [ onClick LoadMore ] [ text "Load More" ]
 
 
 
