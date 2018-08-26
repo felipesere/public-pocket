@@ -33,14 +33,14 @@ type alias Model =
     }
 
 
-init : Model
-init =
-    { articles = [] }
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( { articles = [] }, Cmd.none )
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    model
+    ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -48,5 +48,14 @@ view model =
     text "Hello World!"
 
 
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, update = update, subscriptions = subscriptions, view = view }
