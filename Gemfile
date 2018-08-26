@@ -2,6 +2,7 @@ source 'https://rubygems.org' do
   gem 'http', '~> 3.0'
   gem 'sinatra', '~> 2.0', '>= 2.0.1'
   gem 'sinatra-contrib', '~> 2.0', '>= 2.0.1'
+  gem 'sinatra-cross_origin'
   gem 'pg'
   gem 'sequel', '~> 5.5'
   gem 'sequel_pg', '~> 1.8', '>= 1.8.1'

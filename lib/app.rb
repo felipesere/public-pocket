@@ -5,6 +5,10 @@ require "builder"
 
 set :public_folder, Proc.new { File.join(root, "static") }
 
+configure do
+  enable :cross_origin
+end
+
 get '/' do
   send_file File.join(settings.public_folder, 'index.html')
 end
@@ -22,6 +26,7 @@ end
 namespace "/api" do
   before do
     content_type 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
   end
 
   get "/articles/:page/:size" do
