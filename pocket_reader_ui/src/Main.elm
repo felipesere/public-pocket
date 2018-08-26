@@ -133,7 +133,21 @@ update msg model =
 
 view : Model -> Html Msg
 view { articles, page } =
-    div [] (List.append (List.map viewArticle articles) [ pagination page ])
+    case articles of
+        [] ->
+            spinner
+
+        _ ->
+            div [] (List.append (List.map viewArticle articles) [ pagination page ])
+
+
+spinner : Html Msg
+spinner =
+    div [ class "lds-spinner" ]
+        [ div [] []
+        , div [] []
+        , div [] []
+        ]
 
 
 viewArticle : Article -> Html Msg
