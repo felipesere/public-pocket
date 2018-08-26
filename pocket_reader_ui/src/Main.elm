@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Url.Builder as Url
 import Json.Decode exposing (field)
-import Html exposing (Html, text)
+import Html exposing (Html, text, div, ol, li)
 import Http exposing (send)
 import Browser
 
@@ -12,9 +12,7 @@ type alias Page =
 
 
 type Msg
-    = NoOp
-    | ReadArticles Page
-    | NewArticles (Result Http.Error ApiResponse)
+    = NewArticles (Result Http.Error ApiResponse)
 
 
 type alias Article =
@@ -92,13 +90,28 @@ decodeArticleTime =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    case msg of
+        NewArticles result ->
+            case result of
+                Err _ ->
+                    ( model, Cmd.none )
+
+                Ok apiResponse ->
+                    let
+                        allArticles =
+                            List.append model.articles apiResponse.articles
+                    in
+                        ( { model | articles = allArticles }, Cmd.none )
 
 
 view : Model -> Html Msg
-view model =
-    text "Hello World!"
+view { articles } =
+    let
+        titles =
+            List.map (\article -> li [] [ text article.title ]) articles
+    in
+        ol [] titles
 
 
 
