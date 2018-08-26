@@ -1,16 +1,17 @@
 module Main exposing (..)
 
 import Url.Builder as Url
-import Json.Decode exposing (field)
+import Json.Decode exposing (field, maybe)
 import Html exposing (Html, text, div, ol, li, button)
 import Html.Events exposing (onClick)
 import Http exposing (send)
 import Browser
+import Debug exposing (..)
 
 
 type Msg
     = NewArticles (Result Http.Error ApiResponse)
-    | LoadMore
+    | Load String
 
 
 type alias Article =
@@ -33,29 +34,59 @@ type alias Articles =
     List Article
 
 
+type Page
+    = Next String
+    | NextPrevious String String
+    | Previous String
+
+
+derive { previous, next } =
+    case ( previous, next ) of
+        ( Just m, Just n ) ->
+            Just <| NextPrevious m n
+
+        ( Just m, _ ) ->
+            Just <| Previous m
+
+        ( _, Just n ) ->
+            Just <| Next n
+
+        _ ->
+            Nothing
+
+
 type alias Model =
     { articles : Articles
-    , next : String
+    , page : Maybe Page
     }
 
 
 type alias ApiResponse =
     { articles : Articles
-    , next : String
+    , next : Maybe String
+    , previous : Maybe String
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    let
-        next =
-            "/api/articles/0/10"
-    in
-        ( { articles = [], next = next }, loadPage next )
+    ( { articles = [], page = Nothing }, load "/api/articles/0/10" )
 
 
-loadPage : String -> Cmd Msg
-loadPage page =
+nextPage page =
+    case page of
+        Next a ->
+            load a
+
+        NextPrevious _ a ->
+            load a
+
+        _ ->
+            Debug.todo "Should not have reached here"
+
+
+load : String -> Cmd Msg
+load page =
     Http.send NewArticles (Http.get (toPocketUrl page) decodeArticles)
 
 
@@ -66,9 +97,10 @@ toPocketUrl page =
 
 decodeArticles : Json.Decode.Decoder ApiResponse
 decodeArticles =
-    Json.Decode.map2 ApiResponse
+    Json.Decode.map3 ApiResponse
         (field "articles" <| Json.Decode.list decodeArticle)
-        (field "next" <| Json.Decode.string)
+        (maybe (field "next" Json.Decode.string))
+        (maybe (field "previous" Json.Decode.string))
 
 
 decodeArticle : Json.Decode.Decoder Article
@@ -92,8 +124,8 @@ decodeArticleTime =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadMore ->
-            ( model, loadPage model.next )
+        Load page ->
+            ( model, load page )
 
         NewArticles result ->
             case result of
@@ -102,27 +134,42 @@ update msg model =
 
                 Ok apiResponse ->
                     let
-                        allArticles =
-                            List.append model.articles apiResponse.articles
+                        page =
+                            derive apiResponse
                     in
-                        ( { model | articles = allArticles, next = apiResponse.next }, Cmd.none )
+                        ( { model | articles = apiResponse.articles, page = page }, Cmd.none )
 
 
 view : Model -> Html Msg
-view { articles } =
+view { articles, page } =
     let
         titles =
             List.map (\article -> li [] [ text article.title ]) articles
+
+        list_of_titles =
+            [ ol [] titles ]
     in
-        div []
-            [ ol [] titles
-            , moreArticles
-            ]
+        div [] (List.append list_of_titles (buttons page))
 
 
-moreArticles : Html Msg
-moreArticles =
-    button [ onClick LoadMore ] [ text "Load More" ]
+buttons : Maybe Page -> List (Html Msg)
+buttons maybe_page =
+    case maybe_page of
+        Nothing ->
+            []
+
+        Just page ->
+            case page of
+                Next a ->
+                    [ button [ onClick (Load a) ] [ text "Load More" ] ]
+
+                NextPrevious a b ->
+                    [ button [ onClick (Load b) ] [ text "Load More" ]
+                    , button [ onClick (Load a) ] [ text "Load Previous" ]
+                    ]
+
+                Previous a ->
+                    [ button [ onClick (Load a) ] [ text "Load Previous" ] ]
 
 
 
