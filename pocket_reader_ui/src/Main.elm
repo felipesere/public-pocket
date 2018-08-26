@@ -133,7 +133,7 @@ update msg model =
 
 view : Model -> Html Msg
 view { articles, page } =
-    div [] (List.append (List.map viewArticle articles) (buttons page))
+    div [] (List.append (List.map viewArticle articles) [ pagination page ])
 
 
 viewArticle : Article -> Html Msg
@@ -156,7 +156,7 @@ viewContent { content, time, tags } =
 
 
 viewFooter { link } =
-    footer [ class "card-footer-item" ]
+    footer [ class "card-footer" ]
         [ a [ href link, class "card-footer-item", target "_blank" ] [ text "Open" ]
         , a [ href (pocket link), class "card-footer-item", target "_blank" ] [ text "Save to Pocket" ]
         ]
@@ -167,28 +167,40 @@ pocket link =
     "https://getpocket.com/edit.php?url=" ++ link
 
 
+viewTag : String -> Html Msg
 viewTag tagname =
     span [ class "tag is-info is-rounded" ] [ text tagname ]
 
 
-buttons : Maybe Page -> List (Html Msg)
-buttons maybe_page =
-    case maybe_page of
-        Nothing ->
-            []
+pagination : Maybe Page -> Html Msg
+pagination maybe_page =
+    let
+        bttns =
+            maybe_page
+                |> Maybe.map buttons
+                |> Maybe.withDefault []
+    in
+        Html.nav [ class "pagination is-right" ] bttns
 
-        Just page ->
-            case page of
-                Next a ->
-                    [ button [ onClick (Load a) ] [ text "Load More" ] ]
 
-                NextPrevious a b ->
-                    [ button [ onClick (Load b) ] [ text "Load More" ]
-                    , button [ onClick (Load a) ] [ text "Load Previous" ]
-                    ]
+buttons : Page -> List (Html Msg)
+buttons page =
+    let
+        next a =
+            button [ class "pagination-next", onClick (Load a) ] [ text "Next page" ]
 
-                Previous a ->
-                    [ button [ onClick (Load a) ] [ text "Load Previous" ] ]
+        previous a =
+            button [ class "pagination-previous", onClick (Load a) ] [ text "Previous Page" ]
+    in
+        case page of
+            Next a ->
+                [ next a ]
+
+            NextPrevious a b ->
+                [ previous b, next a ]
+
+            Previous a ->
+                [ previous a ]
 
 
 
