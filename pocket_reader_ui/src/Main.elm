@@ -1,11 +1,20 @@
 module Main exposing (..)
 
+import Url.Builder as Url
+import Json.Decode exposing (field)
 import Html exposing (Html, text)
+import Http exposing (send)
 import Browser
+
+
+type alias Page =
+    { size : Int, number : Int }
 
 
 type Msg
     = NoOp
+    | ReadArticles Page
+    | NewArticles (Result Http.Error ApiResponse)
 
 
 type alias Article =
@@ -33,13 +42,57 @@ type alias Model =
     }
 
 
+type alias ApiResponse =
+    { articles : Articles }
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { articles = [] }, Cmd.none )
+    ( { articles = [] }, initialPage )
+
+
+initialPage : Cmd Msg
+initialPage =
+    let
+        page =
+            { size = 10, number = 0 }
+    in
+        Http.send NewArticles (Http.get (toPocketUrl page) decodeArticles)
+
+
+toPocketUrl : Page -> String
+toPocketUrl { size, number } =
+    Url.crossOrigin "https://publicpocket.herokuapp.com"
+        [ "api", "articles", (String.fromInt number), (String.fromInt size) ]
+        []
+
+
+decodeArticles : Json.Decode.Decoder ApiResponse
+decodeArticles =
+    Json.Decode.map ApiResponse
+        (field "articles" <| Json.Decode.list decodeArticle)
+
+
+decodeArticle : Json.Decode.Decoder Article
+decodeArticle =
+    Json.Decode.map6 Article
+        (field "id" Json.Decode.int)
+        (field "title" Json.Decode.string)
+        (field "content" Json.Decode.string)
+        (field "link" Json.Decode.string)
+        (field "time" decodeArticleTime)
+        (field "tags" <| Json.Decode.list Json.Decode.string)
+
+
+decodeArticleTime : Json.Decode.Decoder ArticleTime
+decodeArticleTime =
+    Json.Decode.map2 ArticleTime
+        (field "short" Json.Decode.string)
+        (field "long" Json.Decode.string)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update _ model =
     ( model, Cmd.none )
 
 
