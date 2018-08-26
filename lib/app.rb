@@ -2,11 +2,13 @@ require "sinatra"
 require "sinatra/namespace"
 require_relative "articles"
 require "builder"
+require "rack/deflater"
 
 set :public_folder, Proc.new { File.join(root, "static") }
 
 configure do
   enable :cross_origin
+  use Rack::Deflater
 end
 
 get '/' do
