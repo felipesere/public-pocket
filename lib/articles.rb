@@ -3,9 +3,8 @@ require "date"
 
 class Articles
   def connecting
-    Sequel.extension :core_extensions
+    Sequel.extension :core_extensions, :pg_array
     Sequel.connect(ENV.fetch("DATABASE_URL")) do |db|
-      db.extension(:pg_array)
       yield(db)
     end
   end
@@ -36,10 +35,9 @@ class Articles
   end
 
   def save_all(raw_entries)
-    entries = raw_entries.map { |entry| article(entry) }
-
     connecting do |db|
-      db[:articles].insert_conflict.multi_insert(entries)
+      entries = raw_entries.map { |entry| article(entry) }
+      db[:articles].insert_conflict.multi_insert(entries, return: :primary_id)
     end
   end
 

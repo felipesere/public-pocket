@@ -2,8 +2,9 @@ require "http"
 require "json"
 
 class PocketReader
-  def initialize(consumer_key)
+  def initialize(consumer_key, last_success)
     @consumer_key = consumer_key
+    @last_success = last_success
   end
 
   def read(token, tags)
@@ -22,7 +23,8 @@ class PocketReader
       "consumer_key" => @consumer_key,
       "detailType" => "complete",
       "access_token" => token,
-      "tag" => tags
+      "tag" => tags,
+      "since" => @last_success.tv_sec
     }
   end
 end
