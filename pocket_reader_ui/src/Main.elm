@@ -39,6 +39,7 @@ type Page
     | Previous String
 
 
+derive : ApiResponse -> Maybe Page
 derive { previous, next } =
     case ( previous, next ) of
         ( Just m, Just n ) ->
