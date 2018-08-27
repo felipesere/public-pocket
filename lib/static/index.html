@@ -33,6 +33,14 @@
           var app = Elm.Main.init({
             node: document.getElementById('cards')
           });
+
+          app.ports.scroll.subscribe(function() {
+            window.scrollTo({
+              "behavior": "smooth",
+              "left": 0,
+              "top": 0
+            });
+          });
         </script>
       </div>
     </section>

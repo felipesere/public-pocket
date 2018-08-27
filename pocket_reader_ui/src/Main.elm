@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Json.Decode exposing (field, maybe)
 import Html exposing (Html, text, div, ol, li, button, p, span, footer, a)
@@ -125,7 +125,7 @@ update msg model =
                         page =
                             derive apiResponse
                     in
-                        ( { model | articles = apiResponse.articles, page = page }, Cmd.none )
+                        ( { model | articles = apiResponse.articles, page = page }, scroll () )
 
 
 
@@ -231,6 +231,13 @@ buttons page =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+
+-- PORTS
+
+
+port scroll : () -> Cmd msg
 
 
 main =
