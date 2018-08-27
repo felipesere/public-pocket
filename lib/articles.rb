@@ -2,24 +2,29 @@ require "sequel"
 require "date"
 
 class Articles
-  def initialize
+  def connecting
     Sequel.extension :core_extensions
-    db = Sequel.connect(ENV.fetch("DATABASE_URL"))
-    db.extension(:pg_array)
-    @db = db
+    Sequel.connect(ENV.fetch("DATABASE_URL")) do |db|
+      db.extension(:pg_array)
+      yield(db)
+    end
   end
 
   def all
-    @db[:articles].order_by(Sequel.desc(:time)).all.map do |article|
-      article[:time] = format(article[:time])
-      article
+    connecting do |db|
+      db[:articles].order_by(Sequel.desc(:time)).all.map do |article|
+        article[:time] = format(article[:time])
+        article
+      end
     end
   end
 
   def paginated(page, size)
-    @db[:articles].limit(size, page*size).order_by(Sequel.desc(:time)).map do |article|
-      article[:time] = format(article[:time])
-      article
+    connecting do |db|
+      db[:articles].limit(size, page*size).order_by(Sequel.desc(:time)).map do |article|
+        article[:time] = format(article[:time])
+        article
+      end
     end
   end
 
@@ -33,7 +38,9 @@ class Articles
   def save_all(raw_entries)
     entries = raw_entries.map { |entry| article(entry) }
 
-    @db[:articles].insert_conflict.multi_insert(entries)
+    connecting do |db|
+      db[:articles].insert_conflict.multi_insert(entries)
+    end
   end
 
   def article(entry)
