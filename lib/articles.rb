@@ -3,8 +3,9 @@ require "date"
 
 class Articles
   def connecting
-    Sequel.extension :core_extensions, :pg_array
+    Sequel.extension :core_extensions
     Sequel.connect(ENV.fetch("DATABASE_URL")) do |db|
+      db.extension(:pg_array)
       yield(db)
     end
   end
