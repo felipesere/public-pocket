@@ -3,7 +3,7 @@ module Main exposing (..)
 import Json.Decode exposing (field, maybe)
 import Html exposing (Html, text, div, ol, li, button, p, span, footer, a)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (target, class, datetime, href)
+import Html.Attributes exposing (disabled, target, class, datetime, href)
 import Http exposing (send)
 import Browser
 
@@ -206,16 +206,22 @@ buttons page =
 
         previous a =
             button [ class "pagination-previous", onClick (Load a) ] [ text "Previous Page" ]
+
+        noPrevious =
+            button [ class "pagination-previous", disabled True ] [ text "Previous Page" ]
+
+        noNext =
+            button [ class "pagination-next", disabled True ] [ text "Next Page" ]
     in
         case page of
             Next a ->
-                [ next a ]
+                [ noPrevious, next a ]
 
             NextPrevious a b ->
-                [ previous b, next a ]
+                [ previous a, next b ]
 
             Previous a ->
-                [ previous a ]
+                [ previous a, noNext ]
 
 
 
